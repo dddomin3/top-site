@@ -1,0 +1,229 @@
+<head>
+  <script src="https://unpkg.com/vue"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <div class="jumbotron">
+      <h1 class="display-4">Test of Playfulness Calculator</h1>
+      <p class="lead">This generates an estimate of the test of playfulness using constants generated from previous
+        iterations.</p>
+      <hr class="my-4">
+      <p>Please input general information about your subject. Be careful of HIPAA violations! Don't use PII.</p>
+      <div class="row">
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Name">Name/ID</span>
+          </div>
+          <input v-model="name" class="form-control" aria-label="Name input" aria-describedby="inputGroup-sizing-Name">
+        </div>
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Age">Age</span>
+          </div>
+          <input v-model="age" class="form-control" aria-label="Age input" aria-describedby="inputGroup-sizing-Age">
+        </div>
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Diagnosis">Diagnosis</span>
+          </div>
+          <input v-model="diagnosis" class="form-control" aria-label="Diagnosis input"
+            aria-describedby="inputGroup-sizing-Diagnosis">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-ExaminerName">Examiner's Name</span>
+          </div>
+          <input v-model="examinerName" class="form-control" aria-label="ExaminerName input"
+            aria-describedby="inputGroup-sizing-ExaminerName">
+        </div>
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-ExaminerId">Examiner's ID</span>
+          </div>
+          <input v-model="examinerId" class="form-control" aria-label="ExaminerId input"
+            aria-describedby="inputGroup-sizing-ExaminerId">
+        </div>
+        <div class="input-group input-group-sm col-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Date">Examination Date</span>
+          </div>
+          <input v-model="date" class="form-control" aria-label="Date input" aria-describedby="inputGroup-sizing-Date">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-group input-group-sm col-sm-9 mb-9">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Comments">Comments</span>
+          </div>
+          <textarea v-model="comments" class="form-control" aria-label="Comments input"
+            aria-describedby="inputGroup-sizing-Comments"></textarea>
+        </div>
+        <div class="input-group mb-9 col-sm-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-Outdoors">Outdoors?</span>
+          </div>
+          <div class="input-group-text">
+            <input type="checkbox" aria-label="Is the examination outdoors?" v-model="isOutdoor">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-group mb-3">
+      <button type="button" class="btn btn-success btn-lg col-sm-9" v-on:click="calculate" role="button">Submit Data...</button>
+      <button type="button" class="btn btn-info btn-lg col-sm-3" role="button">Upload CSV</button>
+    </div>
+
+    <div class="alert alert-success" role="alert" v-if="outputSuccess">
+      <table class="table">
+        <tr>
+          <th scope="col">Item Count</th>
+          <th scope="col">Expected score</th>
+          <th scope="col">Model variance</th>
+          <th scope="col">Raw Score</th>
+          <th scope="col">Item Modifier</th>
+          <th scope="col">ID Found?</th>
+        </tr>
+        <tr>
+          <td scope="col">{{itemCount}}</td>
+          <td scope="col">{{expectedScore}}</td>
+          <td scope="col">{{modelVariance}}</td>
+          <td scope="col">{{rawScore}}</td>
+          <td scope="col">{{itemDifficultyModifier}}</td>
+          <td scope="col">{{examinerIdFound}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="alert alert-danger" role="alert" v-if="outputError">
+      <strong>Error: </strong> {{errorText}}
+    </div>
+    <table style="width:100%" class="table">
+      <tr>
+        <th scope="col" style="width:20%;">Item Name</th>
+        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
+        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
+        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
+        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
+        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
+        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
+        <th scope="col" style="width:20%;">Comments</th>
+      </tr>
+      <tr>
+        <th scope="col" style="width:20%;">Item Name</th>
+        <th scope="col" style="width:20%;">Extent</th>
+        <th scope="col" style="width:20%;">Intensity</th>
+        <th scope="col" style="width:20%;">Skill</th>
+        <th scope="col" style="width:20%;">Comments</th>
+      </tr>
+      <tr v-for="(data,i) in dataFormat">
+        <th scope="row"><b>{{data.displayName}}</b></th>
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.extent" :disabled="!data.extent"
+            :id="i" :name="i">
+            <option selected default value="ns">NS</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select></td>
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.intensity"
+            :disabled="!data.intensity" :id="i" :name="i">
+            <option selected default value="ns">NS</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select></td>
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.skill" :disabled="!data.skill"
+            :id="i" :name="i">
+            <option selected default value="ns">NS</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select></td>
+        <td><textarea :id="i" :name="i" v-model="dataInput[i].comments"></textarea></td>
+      </tr>
+    </table>
+
+    <div class="input-group mb-3">
+      <button type="button" class="btn btn-success btn-lg col-sm-9" v-on:click="calculate" role="button">Submit
+        Data...</button>
+      <button type="button" class="btn btn-info btn-lg col-sm-3" role="button">Upload CSV</button>
+    </div>
+    <div class="alert alert-success" role="alert" v-if="outputSuccess">
+      <table class="table">
+        <tr>
+          <th scope="col">Item Count</th>
+          <th scope="col">Expected score</th>
+          <th scope="col">Model variance</th>
+          <th scope="col">Raw Score</th>
+          <th scope="col">Item Modifier</th>
+          <th scope="col">ID Found?</th>
+        </tr>
+        <tr>
+          <td scope="col">{{itemCount}}</td>
+          <td scope="col">{{expectedScore}}</td>
+          <td scope="col">{{modelVariance}}</td>
+          <td scope="col">{{rawScore}}</td>
+          <td scope="col">{{itemDifficultyModifier}}</td>
+          <td scope="col">{{examinerIdFound}}</td>
+        </tr>
+      </table>
+    </div>
+    <div class="alert alert-danger" role="alert" v-if="outputError">
+      <strong>Error: </strong> {{errorText}}
+    </div>
+    <button type="button" class="btn disabled btn-danger btn-lg col-sm-3" v-on:click="debugModeActivate" role="button">
+      Don't click this.
+    </button>
+    <div v-if="debugMode" class="row">
+      
+      <div class="input-group input-group-sm col-sm mb-3" v-for="(data,i) in debugStepDifficulty">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-stepDifficulty">stepDifficulty[{{i}}]</span>
+        </div>
+        <input type="number" v-model.number="data.difficulty" class="form-control" aria-label="stepDifficulty input"
+          aria-describedby="inputGroup-sizing-stepDifficulty">
+      </div>
+
+      <div class="input-group input-group-sm col-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-initialAbilityEstimate">initialAbilityEstimate</span>
+        </div>
+        <input type="number" v-model.number="config.initialAbilityEstimate" class="form-control" aria-label="initialAbilityEstimate input"
+          aria-describedby="inputGroup-sizing-initialAbilityEstimate">
+      </div>
+
+      <div class="input-group input-group-sm col-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-outdoorModifier">outdoorModifier</span>
+        </div>
+        <input type="number" v-model.number="config.outdoorModifier" class="form-control" aria-label="outdoorModifier input"
+          aria-describedby="inputGroup-sizing-outdoorModifier">
+      </div>
+
+      <div class="input-group input-group-sm col-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-defaultExaminerModifier">defaultExaminerModifier</span>
+        </div>
+        <input type="number" v-model.number="examinerData.default.measure" class="form-control"
+          aria-label="defaultExaminerModifier input" aria-describedby="inputGroup-sizing-defaultExaminerModifier">
+      </div>
+
+    </div>
+  </div>
+</body>
