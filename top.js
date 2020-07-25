@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/7999d9430f077bf13b7e34e37217f5af1b84d09e/top.json');
+    const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/top.json');
     const topJson = await response.json(); //extract JSON from the http response
     console.log(topJson)
     // process incoming json into several config objects
