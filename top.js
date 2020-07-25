@@ -24,7 +24,7 @@ const main = async () => {
         };
     });
     console.log(config, dataFormat, dataInput)
-    let name, age, date, diagnosis, examinerName, examinerId, isOutdoor, comments, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
+    let name, age, date, diagnosis, examinerName, examinerId, comments, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
     debugStepDifficulty = config.stepDifficulty.map((stepDifficulty) => ({ difficulty: stepDifficulty }))
     outputSuccess = false;
     outputError = false;
@@ -38,7 +38,6 @@ const main = async () => {
             diagnosis,
             date,
             comments,
-            isOutdoor,
             dataFormat,
             dataInput,
             config,
@@ -66,7 +65,7 @@ const main = async () => {
                 if (this.debugMode) {
                     this.config.stepDifficulty = this.config.stepDifficulty.map((stepDifficulty, i) => this.debugStepDifficulty[i].difficulty)
                 }
-                let itemDifficultyModifier = calculateItemDifficultyModifier(this.isOutdoor, this.examinerId, this.config, this.examinerData)
+                let itemDifficultyModifier = calculateItemDifficultyModifier(this.examinerId, this.config, this.examinerData)
                 console.log(itemDifficultyModifier)
                 iterationOutput = iterate(this.dataInput, this.dataFormat, itemDifficultyModifier, this.config)
 
@@ -113,11 +112,8 @@ function perItemMath(itemDifficulty, abilityEstimate, itemName, config) {
     variance = sumSquare / normalizer - expectation * expectation
     return { expectation, variance }
 }
-function calculateItemDifficultyModifier(isOutdoor, examinerId, config, examinerData) {
+function calculateItemDifficultyModifier(examinerId, config, examinerData) {
     let modifier = 0
-    if (isOutdoor) {
-        modifier += config.outdoorModifier
-    }
     if ((typeof examinerId !== 'undefined') && (examinerData[examinerId])) {
         modifier += examinerData[examinerId].measure
     }

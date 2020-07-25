@@ -65,20 +65,12 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-group input-group-sm col-sm-9 mb-9">
+        <div class="input-group input-group-sm col-sm-12 mb-12">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-Comments">Comments</span>
           </div>
           <textarea v-model="comments" class="form-control" aria-label="Comments input"
             aria-describedby="inputGroup-sizing-Comments"></textarea>
-        </div>
-        <div class="input-group mb-9 col-sm-3">
-          <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-Outdoors">Outdoors?</span>
-          </div>
-          <div class="input-group-text">
-            <input type="checkbox" aria-label="Is the examination outdoors?" v-model="isOutdoor">
-          </div>
         </div>
       </div>
     </div>
@@ -112,16 +104,6 @@
       <strong>Error: </strong> {{errorText}}
     </div>
     <table style="width:100%" class="table">
-      <tr>
-        <th scope="col" style="width:20%;">Item Name</th>
-        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
-        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
-        <th v-if="!isOutdoor" scope="col" style="width:20%;">Indoor</th>
-        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
-        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
-        <th v-if="isOutdoor" scope="col" style="width:20%;">Outdoor</th>
-        <th scope="col" style="width:20%;">Comments</th>
-      </tr>
       <tr>
         <th scope="col" style="width:20%;">Item Name</th>
         <th scope="col" style="width:20%;">Extent</th>
@@ -206,14 +188,6 @@
         </div>
         <input type="number" v-model.number="config.initialAbilityEstimate" class="form-control" aria-label="initialAbilityEstimate input"
           aria-describedby="inputGroup-sizing-initialAbilityEstimate">
-      </div>
-
-      <div class="input-group input-group-sm col-sm mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-outdoorModifier">outdoorModifier</span>
-        </div>
-        <input type="number" v-model.number="config.outdoorModifier" class="form-control" aria-label="outdoorModifier input"
-          aria-describedby="inputGroup-sizing-outdoorModifier">
       </div>
 
       <div class="input-group input-group-sm col-sm mb-3">
