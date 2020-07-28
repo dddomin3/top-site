@@ -1,5 +1,5 @@
 <head>
-  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -20,13 +20,13 @@
       <p class="lead">This generates an estimate of the test of playfulness using constants generated from previous
         iterations.</p>
       <hr class="my-4">
-      <p>Please input general information about your subject. Be careful of HIPAA violations! Don't use PII.</p>
+      <!--<p>Please input general information about your subject. Be careful of HIPAA violations! Don't use PII.</p>-->
       <div class="row">
         <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-Name">Name/ID</span>
           </div>
-          <input v-model="name" class="form-control" aria-label="Name input" aria-describedby="inputGroup-sizing-Name">
+          <input v-model="name" @input="routeUpdate" class="form-control" aria-label="Name input" aria-describedby="inputGroup-sizing-Name">
         </div>
         <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
@@ -54,7 +54,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-ExaminerId">Examiner's ID</span>
           </div>
-          <input v-model="examinerId" class="form-control" aria-label="ExaminerId input"
+          <input v-model="examinerId" @input="routeUpdate" class="form-control" aria-label="ExaminerId input"
             aria-describedby="inputGroup-sizing-ExaminerId">
         </div>
         <div class="input-group input-group-sm col-sm mb-3">
@@ -65,7 +65,16 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-group input-group-sm col-sm-12 mb-12">
+        <div class="input-group input-group-sm col-sm mb-12">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-dataLine">DataLine</span>
+          </div>
+          <input v-model="dataLine" @input="parseDataLine" class="form-control" aria-label="dataLine input"
+            aria-describedby="inputGroup-sizing-DataLine">
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-group input-group-sm col-sm mb-12">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-Comments">Comments</span>
           </div>
@@ -113,7 +122,7 @@
       </tr>
       <tr v-for="(data,i) in dataFormat">
         <th scope="row"><b>{{data.displayName}}</b></th>
-        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.extent" :disabled="!data.extent"
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.extent" @change="routeUpdate" :disabled="!data.extent"
             :id="i" :name="i">
             <option selected default value="ns">NS</option>
             <option value="0">0</option>
@@ -121,15 +130,15 @@
             <option value="2">2</option>
             <option value="3">3</option>
           </select></td>
-        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.intensity"
-            :disabled="!data.intensity" :id="i" :name="i">
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.intensity" @change="routeUpdate" :disabled="!data.intensity"
+            :id="i" :name="i">
             <option selected default value="ns">NS</option>
             <option value="0">0</option>
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
           </select></td>
-        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.skill" :disabled="!data.skill"
+        <td><select class="custom-select custom-select-sm" v-model="dataInput[i].data.skill" @change="routeUpdate" :disabled="!data.skill"
             :id="i" :name="i">
             <option selected default value="ns">NS</option>
             <option value="0">0</option>

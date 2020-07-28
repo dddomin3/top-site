@@ -23,7 +23,9 @@ const main = async () => {
             comments: ""
         };
     });
-    console.log(config, dataFormat, dataInput)
+    let dataLine = makeDataLine(dataInput, '', '')
+
+    console.log(config, dataFormat, dataInput, dataLine)
     let name, age, date, diagnosis, examinerName, examinerId, comments, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
     debugStepDifficulty = config.stepDifficulty.map((stepDifficulty) => ({ difficulty: stepDifficulty }))
     outputSuccess = false;
@@ -40,6 +42,7 @@ const main = async () => {
             comments,
             dataFormat,
             dataInput,
+            dataLine,
             config,
             examinerData,
 
@@ -78,11 +81,92 @@ const main = async () => {
             },
             debugModeActivate: function (e) {
                 this.debugMode = true
+            },
+            routeUpdate: function (e) {
+                let self = this
+                Vue.nextTick(function () {
+                    self.dataLine = makeDataLine(self.dataInput, self.name, self.examinerId)
+                    window.history.replaceState(null, '', '/#' + self.dataLine)
+                    console.log(self.dataLine)
+                })
+            },
+            parseDataLine: function (e) {
+                let dataLineArray = this.dataLine.split(',')
+                this.name = dataLineArray[0]
+                this.examinerId = dataLineArray[1]
+                dataLineArray = dataLineArray.slice(3) // Removing garbage characters
+                let self = this
+                this.dataInput.forEach(function (val, index) {
+                    if (val.data.extent) {
+                        let newValue = dataLineArray.shift()
+                        if (newValue === "") {
+                            self.dataInput[index].data.extent = 'ns'
+                        }
+                        else {
+                            self.dataInput[index].data.extent = newValue
+                        }
+                    }
+                })
+                this.dataInput.forEach(function (val, index) {
+                    if (val.data.intensity) {
+                        let newValue = dataLineArray.shift()
+                        if (newValue === "") {
+                            self.dataInput[index].data.intensity = 'ns'
+                        }
+                        else {
+                            self.dataInput[index].data.intensity = newValue
+                        }
+                    }
+                })
+                this.dataInput.forEach(function (val, index) {
+                    if (val.data.skill) {
+                        let newValue = dataLineArray.shift()
+                        if (newValue === "") {
+                            self.dataInput[index].data.skill = 'ns'
+                        }
+                        else {
+                            self.dataInput[index].data.skill = newValue
+                        }
+                    }
+                })
             }
         }
     });
 }
 main()
+
+function makeDataLine(dataInput, subjectId, raterId) {
+    let extent = []
+    let intensity = []
+    let skill = []
+    dataInput.forEach(function (val, index) {
+        if (val.data.extent) {
+            if (val.data.extent === 'ns') {
+                extent.push(null)
+            }
+            else {
+                extent.push(val.data.extent)
+            }
+        }
+        if (val.data.intensity) {
+            if (val.data.intensity === 'ns') {
+                intensity.push(null)
+            }
+            else {
+                intensity.push(val.data.intensity)
+            }
+        }
+        if (val.data.skill) {
+            if (val.data.skill === 'ns') {
+                skill.push(null)
+            }
+            else {
+                skill.push(val.data.skill)
+            }
+        }
+    })
+    return [subjectId, raterId, '1-28'].concat(extent, intensity, skill).join()
+}
 
 function countItems(dataInput) {
     return dataInput.map(function (input) {
