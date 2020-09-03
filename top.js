@@ -86,7 +86,7 @@ const main = async () => {
                 let self = this
                 Vue.nextTick(function () {
                     self.dataLine = makeDataLine(self.dataInput, self.name, self.examinerId)
-                    window.history.replaceState(null, '', '/top.html#' + self.dataLine)
+                    window.history.replaceState(null, '', 'top.html#' + self.dataLine)
                     console.log(self.dataLine)
                 })
             },
