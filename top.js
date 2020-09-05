@@ -228,12 +228,15 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
             if (modelVariance < 1) {
                 // ...and set its minimum value at 1.0:  Variance divider = max(Variance*2, 1.0)
                 modelVariance = 1
+                outputMath.modelVariance = 1
             }
             console.log('overshot')
         }
+        else {
+            modelVariance = outputMath.modelVariance
+        }
         outputMath = iterativeMath(dataInput, dataFormat, previousEstimate, itemDifficultyModifier, config)
         expectedScore = outputMath.expectedScore
-        modelVariance = outputMath.modelVariance
         rawScore = outputMath.rawScore
         currentEstimate = previousEstimate + (rawScore - expectedScore) / modelVariance
         iterationCount++
