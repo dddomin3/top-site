@@ -25,8 +25,18 @@ const main = async () => {
     });
     let dataLine = makeDataLine(dataInput, '', '')
 
-    console.log(config, dataFormat, dataInput, dataLine)
     let name, age, date, diagnosis, examinerName, examinerId, comments, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
+
+    // Populate data using URL
+    if (location.hash) {
+        dataLine = location.hash.substring(1)
+        let output = parseDataLine(dataLine, dataInput)
+        name = output.name
+        examinerId = output.examinerId
+        dataInput = output.dataInput
+    }
+
+    console.log({config, dataFormat, dataInput, dataLine})
     debugStepDifficulty = config.stepDifficulty.map((stepDifficulty) => ({ difficulty: stepDifficulty }))
     outputSuccess = false;
     outputError = false;
@@ -91,44 +101,10 @@ const main = async () => {
                 })
             },
             parseDataLine: function (e) {
-                let dataLineArray = this.dataLine.split(',')
-                this.name = dataLineArray[0]
-                this.examinerId = dataLineArray[1]
-                dataLineArray = dataLineArray.slice(3) // Removing garbage characters
-                let self = this
-                this.dataInput.forEach(function (val, index) {
-                    if (val.data.extent) {
-                        let newValue = dataLineArray.shift()
-                        if (newValue === "") {
-                            self.dataInput[index].data.extent = 'ns'
-                        }
-                        else {
-                            self.dataInput[index].data.extent = newValue
-                        }
-                    }
-                })
-                this.dataInput.forEach(function (val, index) {
-                    if (val.data.intensity) {
-                        let newValue = dataLineArray.shift()
-                        if (newValue === "") {
-                            self.dataInput[index].data.intensity = 'ns'
-                        }
-                        else {
-                            self.dataInput[index].data.intensity = newValue
-                        }
-                    }
-                })
-                this.dataInput.forEach(function (val, index) {
-                    if (val.data.skill) {
-                        let newValue = dataLineArray.shift()
-                        if (newValue === "") {
-                            self.dataInput[index].data.skill = 'ns'
-                        }
-                        else {
-                            self.dataInput[index].data.skill = newValue
-                        }
-                    }
-                })
+                let {name, examinerId, dataInput} = parseDataLine(this.dataLine, this.dataInput)
+                this.name = name
+                this.examinerId = examinerId
+                // this.dataInput = dataInput // This might break stuff...
             }
         }
     });
@@ -165,7 +141,49 @@ function makeDataLine(dataInput, subjectId, raterId) {
             }
         }
     })
-    return [subjectId, raterId, '1-28'].concat(extent, intensity, skill).join()
+    let dataLineArray = [subjectId, raterId, '1-28'].concat(extent, intensity, skill)
+    return dataLineArray.join()
+}
+
+function parseDataLine(dataLine, dataInput) {
+    let dataLineArray = dataLine.split(',')
+    let name = dataLineArray[0]
+    let examinerId = dataLineArray[1]
+    dataLineArray = dataLineArray.slice(3) // Removing garbage characters
+    dataInput.forEach(function (val, index) {
+        if (val.data.extent) {
+            let newValue = dataLineArray.shift()
+            if (newValue === "") {
+                dataInput[index].data.extent = 'ns'
+            }
+            else {
+                dataInput[index].data.extent = newValue
+            }
+        }
+    })
+    dataInput.forEach(function (val, index) {
+        if (val.data.intensity) {
+            let newValue = dataLineArray.shift()
+            if (newValue === "") {
+                dataInput[index].data.intensity = 'ns'
+            }
+            else {
+                dataInput[index].data.intensity = newValue
+            }
+        }
+    })
+    dataInput.forEach(function (val, index) {
+        if (val.data.skill) {
+            let newValue = dataLineArray.shift()
+            if (newValue === "") {
+                dataInput[index].data.skill = 'ns'
+            }
+            else {
+                dataInput[index].data.skill = newValue
+            }
+        }
+    })
+    return {name, examinerId, dataInput}
 }
 
 function countItems(dataInput) {
