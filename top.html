@@ -66,7 +66,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-group input-group-sm col-sm mb-12">
+        <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-dataLine">DataLine</span>
           </div>
@@ -75,7 +75,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-group input-group-sm col-sm mb-12">
+        <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-Comments">Comments</span>
           </div>
@@ -83,11 +83,21 @@
             aria-describedby="inputGroup-sizing-Comments"></textarea>
         </div>
       </div>
+      <div class="row">
+        <div class="input-group input-group-sm col-sm mb-12">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="">Upload CSV...</span>
+          </div>
+          <div class="custom-file">
+            <input type="file" @change="csvUploaded" class="custom-file-input" id="csvUpload">
+            <label class="custom-file-label" for="csvUpload">Choose file</label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="input-group mb-3">
-      <button type="button" class="btn btn-success btn-lg col-sm-9" v-on:click="calculate" role="button">Submit Data...</button>
-      <button type="button" class="btn btn-info btn-lg col-sm-3" role="button">Upload CSV</button>
+      <button type="button" class="btn btn-success btn-lg col-sm-12" v-on:click="calculate" role="button">Submit Data...</button>
     </div>
 
     <div class="alert alert-success" role="alert" v-if="outputSuccess">
@@ -152,9 +162,7 @@
     </table>
 
     <div class="input-group mb-3">
-      <button type="button" class="btn btn-success btn-lg col-sm-9" v-on:click="calculate" role="button">Submit
-        Data...</button>
-      <button type="button" class="btn btn-info btn-lg col-sm-3" role="button">Upload CSV</button>
+      <button type="button" class="btn btn-success btn-lg col-sm-12" v-on:click="calculate" role="button">Submit Data...</button>
     </div>
     <div class="alert alert-success" role="alert" v-if="outputSuccess">
       <table class="table">

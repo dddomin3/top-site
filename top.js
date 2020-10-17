@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/731de21c5bde53f14ed33260e01980c6e101ec36/top.json');
+    const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/top.json');
     const topJson = await response.json(); //extract JSON from the http response
     console.log(topJson)
     // process incoming json into several config objects
@@ -25,7 +25,7 @@ const main = async () => {
     });
     let dataLine = makeDataLine(dataInput, '', '')
 
-    let name, age, date, diagnosis, examinerName, examinerId, comments, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
+    let name, age, date, diagnosis, examinerName, examinerId, comments, csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
 
     // Populate data using URL
     if (location.hash) {
@@ -55,6 +55,8 @@ const main = async () => {
             dataLine,
             config,
             examinerData,
+
+            csvData,
 
             outputSuccess,
             outputError,
@@ -105,6 +107,26 @@ const main = async () => {
                 this.name = name
                 this.examinerId = examinerId
                 // this.dataInput = dataInput // This might break stuff...
+            },
+            csvUploaded: function (e) {
+                // handle file changes
+                let fileList = e.target.files || e.dataTransfer.files
+                console.log(this.csvData)
+                console.log(e)
+                console.log(fileList)
+                let self = this
+                let fileReader = new FileReader()
+                if (!fileList.length) return;
+
+                fileReader.onload = function (e) {
+                    console.log(e.target.result)
+                    // save it
+                    self.csvData = e.target.result
+                }
+
+                fileReader.readAsText(fileList[0])
+                // TODO: Parse this, and put it through the "dataLine" treatment
+                // TODO: Then offer that as a downloadable file
             }
         }
     });
