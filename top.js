@@ -1,7 +1,7 @@
 const main = async () => {
     const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/top.json');
     const topJson = await response.json(); //extract JSON from the http response
-    console.log(topJson)
+    // console.log(topJson)
     // process incoming json into several config objects
     let config = topJson.config
     let examinerData = topJson.examinerData
@@ -36,7 +36,7 @@ const main = async () => {
         dataInput = output.dataInput
     }
 
-    console.log({config, dataFormat, dataInput, dataLine})
+    // console.log({config, dataFormat, dataInput, dataLine})
     debugStepDifficulty = config.stepDifficulty.map((stepDifficulty) => ({ difficulty: stepDifficulty }))
     outputSuccess = false;
     outputError = false;
@@ -74,14 +74,14 @@ const main = async () => {
         methods: {
             calculate: function (e) {
                 this.itemCount = countItems(this.dataInput)
-                console.log(this.dataInput)
-                console.log(e)
-                console.log("Item Count is: " + this.itemCount)
+                // console.log(this.dataInput)
+                // console.log(e)
+                // console.log("Item Count is: " + this.itemCount)
                 if (this.debugMode) {
                     this.config.stepDifficulty = this.config.stepDifficulty.map((stepDifficulty, i) => this.debugStepDifficulty[i].difficulty)
                 }
                 let itemDifficultyModifier = calculateItemDifficultyModifier(this.examinerId, this.config, this.examinerData)
-                console.log(itemDifficultyModifier)
+                // console.log(itemDifficultyModifier)
                 iterationOutput = iterate(this.dataInput, this.dataFormat, itemDifficultyModifier, this.config)
 
                 this.expectedScore = iterationOutput.currentEstimate
@@ -99,7 +99,7 @@ const main = async () => {
                 Vue.nextTick(function () {
                     self.dataLine = makeDataLine(self.dataInput, self.name, self.examinerId)
                     window.history.replaceState(null, '', 'top.html#' + self.dataLine)
-                    console.log(self.dataLine)
+                    // console.log(self.dataLine)
                 })
             },
             parseDataLine: function (e) {
@@ -109,24 +109,84 @@ const main = async () => {
                 // this.dataInput = dataInput // This might break stuff...
             },
             csvUploaded: function (e) {
-                // handle file changes
-                let fileList = e.target.files || e.dataTransfer.files
-                console.log(this.csvData)
-                console.log(e)
-                console.log(fileList)
+                let fileList = e.target.files
+                // console.log(this.csvData)
+                // console.log(e)
+                // console.log(fileList)
                 let self = this
                 let fileReader = new FileReader()
                 if (!fileList.length) return;
 
                 fileReader.onload = function (e) {
-                    console.log(e.target.result)
-                    // save it
-                    self.csvData = e.target.result
+                    console.log(e)
+                    let fileContents = e.target.result
+                    self.csvData = fileContents
+                    let perLine = fileContents.split('\n')
+                    var calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Score,Model Variance"]
+                    const regex = RegExp('[^0-9\\s-,]')
+                    perLine.forEach(dataLine => {
+                        dataLine = dataLine.trim() // Removes any whitespace characters that crept their way in
+                        // TODO: Can do some string treatment here to correct common mistakes or something...
+                        let skip = regex.test(dataLine)
+                        // console.log({dataLine, skip})
+                        if (skip) {return;}
+                        let csvDataInput = self.dataFormat.map(function (i) {
+                            inputObject = {}
+                            if (i.extent) {
+                                inputObject.extent = "ns"
+                            }
+                            if (i.intensity) {
+                                inputObject.intensity = "ns"
+                            }
+                            if (i.skill) {
+                                inputObject.skill = "ns"
+                            }
+                            return {
+                                displayName: i.displayName,
+                                data: Object.assign({}, inputObject),
+                                comments: ""
+                            };
+                        });
+                        let name = ""
+                        let examinerId = 0
+                        let parsedOutput = parseDataLine(dataLine, csvDataInput)
+                        name = parsedOutput.name
+                        examinerId = parsedOutput.examinerId
+                        csvDataInput = parsedOutput.dataInput
+                        // console.log({name, examinerId, csvDataInput})
+                        let itemDifficultyModifier = calculateItemDifficultyModifier(examinerId, self.config, self.examinerData)
+                        let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config)
+                        let outputLine = dataLine + ',' +
+                            iterationOutput.rawScore + ',' + 
+                            iterationOutput.currentEstimate + ',' +
+                            iterationOutput.modelVariance
+                        calculatedOutput.push(outputLine)
+                        // console.log({iterationOutput})
+                        // this.expectedScore = iterationOutput.currentEstimate
+                        // this.modelVariance = iterationOutput.modelVariance
+                        // this.rawScore = iterationOutput.rawScore
+                        // this.outputSuccess = true
+                        // this.itemDifficultyModifier = itemDifficultyModifier
+                    })
+                    // console.log({calculatedOutput})
+                    // Provide file for download
+                    var element = document.createElement('a');
+                    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(calculatedOutput.join('\n')));
+                    element.setAttribute('download', "REPLACEMEWITHAFILENAME");
+                    
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+                    
+                    element.click();
+                    
+                    document.body.removeChild(element);
+                    // TODO: Literally, i think i can parseDataLine -> iterate, and 
+                    // TODO: append the output at the end of the CSV after creating a title line.
+                    // TODO: I should make sure to strip any lines that are garbage, and
+                    // TODO: throw them at the end or something, with a general error at the last column
                 }
 
-                fileReader.readAsText(fileList[0])
-                // TODO: Parse this, and put it through the "dataLine" treatment
-                // TODO: Then offer that as a downloadable file
+                fileReader.readAsText(fileList[0]) // TODO: Allow multiple csv uploads?
             }
         }
     });
@@ -231,7 +291,7 @@ function perItemMath(itemDifficulty, abilityEstimate, itemName, config) {
         expectation = expectation + i * value
         sumSquare = sumSquare + i * i * value
     })
-    console.log({ itemName, normalizer, expectation, sumSquare, currentLogit })
+    // console.log({ itemName, normalizer, expectation, sumSquare, currentLogit })
     expectation = expectation / normalizer
     variance = sumSquare / normalizer - expectation * expectation
     return { expectation, variance }
@@ -270,7 +330,7 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
                 modelVariance = 1
                 outputMath.modelVariance = 1
             }
-            console.log('overshot')
+            // console.log('overshot')
         }
         else {
             modelVariance = outputMath.modelVariance
@@ -282,7 +342,7 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
         iterationCount++
         if (iterationCount > maxIterations) { break }
     }
-    console.log({ iterationCount })
+    // console.log({ iterationCount })
     return { currentEstimate, modelVariance, rawScore }
 }
 
@@ -316,7 +376,7 @@ function iterativeMath(dataInput, dataFormat, abilityEstimate, itemDifficultyMod
             modelVariance = modelVariance + perItemResults.variance
         }
     })
-    console.log({ expectedScore, modelVariance, rawScore })
+    // console.log({ expectedScore, modelVariance, rawScore })
     return { expectedScore, modelVariance, rawScore }
 }
 
