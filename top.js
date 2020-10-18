@@ -116,20 +116,21 @@ const main = async () => {
                 let self = this
                 let fileReader = new FileReader()
                 if (!fileList.length) return;
-
+                let fileName = ""
                 fileReader.onload = function (e) {
                     console.log(e)
                     let fileContents = e.target.result
                     self.csvData = fileContents
                     let perLine = fileContents.split('\n')
-                    var calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Score,Model Variance"]
+                    let calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Score,Model Variance,Link"]
                     const regex = RegExp('[^0-9\\s-,]')
+                    let ignoredInputs = []
                     perLine.forEach(dataLine => {
                         dataLine = dataLine.trim() // Removes any whitespace characters that crept their way in
                         // TODO: Can do some string treatment here to correct common mistakes or something...
                         let skip = regex.test(dataLine)
                         // console.log({dataLine, skip})
-                        if (skip) {return;}
+                        if (skip) { ignoredInputs.push(dataLine); return;}
                         let csvDataInput = self.dataFormat.map(function (i) {
                             inputObject = {}
                             if (i.extent) {
@@ -156,23 +157,26 @@ const main = async () => {
                         // console.log({name, examinerId, csvDataInput})
                         let itemDifficultyModifier = calculateItemDifficultyModifier(examinerId, self.config, self.examinerData)
                         let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config)
+                        let itemLink = '"https://www.testofplayfulness.com/top.html#' + dataLine + '"'
                         let outputLine = dataLine + ',' +
                             iterationOutput.rawScore + ',' + 
                             iterationOutput.currentEstimate + ',' +
-                            iterationOutput.modelVariance
+                            iterationOutput.modelVariance + ',' +
+                            itemLink
+
                         calculatedOutput.push(outputLine)
                         // console.log({iterationOutput})
-                        // this.expectedScore = iterationOutput.currentEstimate
-                        // this.modelVariance = iterationOutput.modelVariance
-                        // this.rawScore = iterationOutput.rawScore
-                        // this.outputSuccess = true
-                        // this.itemDifficultyModifier = itemDifficultyModifier
                     })
                     // console.log({calculatedOutput})
                     // Provide file for download
                     var element = document.createElement('a');
-                    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(calculatedOutput.join('\n')));
-                    element.setAttribute('download', "REPLACEMEWITHAFILENAME");
+                    var fileContent = encodeURIComponent(
+                        calculatedOutput.join('\n') + '\n\n\n' +
+                        "The following inputs were ignored due to improper formatting:,Note: the title of your data may appear here, and that's expected\n\n" +
+                        ignoredInputs.join('\n')
+                    )
+                    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + fileContent);
+                    element.setAttribute('download', filename + "-processed.csv");
                     
                     element.style.display = 'none';
                     document.body.appendChild(element);
@@ -185,7 +189,7 @@ const main = async () => {
                     // TODO: I should make sure to strip any lines that are garbage, and
                     // TODO: throw them at the end or something, with a general error at the last column
                 }
-
+                filename = fileList[0].name.split('.')[0]
                 fileReader.readAsText(fileList[0]) // TODO: Allow multiple csv uploads?
             }
         }
