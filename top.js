@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://gist.githubusercontent.com/dddomin3/7cf6046edf1eaffab2ebb4c94f34ce09/raw/top.json');
+    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK8lWIb5I29PjeY'); //hash for cache busting
     const topJson = await response.json(); //extract JSON from the http response
     // console.log(topJson)
     // process incoming json into several config objects
@@ -25,7 +25,7 @@ const main = async () => {
     });
     let dataLine = makeDataLine(dataInput, '', '')
 
-    let name, age, date, diagnosis, examinerName, examinerId, comments, csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugMode = false, debugStepDifficulty;
+    let name, age, date, diagnosis, examinerName, examinerId, comments, csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
 
     // Populate data using URL
     if (location.hash) {
@@ -57,6 +57,9 @@ const main = async () => {
             examinerData,
 
             csvData,
+            csvDownloadActive,
+            csvDownloadContent,
+            csvDownloadFilename,
 
             outputSuccess,
             outputError,
@@ -68,7 +71,6 @@ const main = async () => {
             itemDifficultyModifier,
             examinerIdFound,
             errorText,
-            debugMode,
             debugStepDifficulty
         },
         methods: {
@@ -77,9 +79,6 @@ const main = async () => {
                 // console.log(this.dataInput)
                 // console.log(e)
                 // console.log("Item Count is: " + this.itemCount)
-                if (this.debugMode) {
-                    this.config.stepDifficulty = this.config.stepDifficulty.map((stepDifficulty, i) => this.debugStepDifficulty[i].difficulty)
-                }
                 let itemDifficultyModifier = calculateItemDifficultyModifier(this.examinerId, this.config, this.examinerData)
                 // console.log(itemDifficultyModifier)
                 iterationOutput = iterate(this.dataInput, this.dataFormat, itemDifficultyModifier, this.config)
@@ -90,9 +89,6 @@ const main = async () => {
                 this.outputSuccess = true
                 this.itemDifficultyModifier = itemDifficultyModifier
                 this.examinerIdFound = typeof this.examinerId === "undefined" ? false : this.examinerId in this.examinerData
-            },
-            debugModeActivate: function (e) {
-                this.debugMode = true
             },
             routeUpdate: function (e) {
                 let self = this
@@ -108,6 +104,9 @@ const main = async () => {
                 this.examinerId = examinerId
                 // this.dataInput = dataInput // This might break stuff...
             },
+            csvHidePanel: function () {
+                this.csvDownloadActive = false
+            },
             csvUploaded: function (e) {
                 let fileList = e.target.files
                 // console.log(this.csvData)
@@ -122,7 +121,7 @@ const main = async () => {
                     let fileContents = e.target.result
                     self.csvData = fileContents
                     let perLine = fileContents.split('\n')
-                    let calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Score,Model Variance,Link"]
+                    let calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Measure,Link"]
                     const regex = RegExp('[^0-9\\s-,]')
                     let ignoredInputs = []
                     perLine.forEach(dataLine => {
@@ -161,7 +160,6 @@ const main = async () => {
                         let outputLine = dataLine + ',' +
                             iterationOutput.rawScore + ',' + 
                             iterationOutput.currentEstimate + ',' +
-                            iterationOutput.modelVariance + ',' +
                             itemLink
 
                         calculatedOutput.push(outputLine)
@@ -175,10 +173,14 @@ const main = async () => {
                         "The following inputs were ignored due to improper formatting:,Note: the title of your data may appear here, and that's expected\n\n" +
                         ignoredInputs.join('\n')
                     )
-                    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + fileContent);
-                    element.setAttribute('download', filename + "-processed.csv");
-                    
+                    self.csvDownloadActive = true
+                    self.csvDownloadFilename = filename + "-processed.csv"
+                    self.csvDownloadContent =  'data:text/csv;charset=utf-8,' + fileContent
+
+                    element.setAttribute('href', self.csvDownloadContent);
+                    element.setAttribute('download', self.csvDownloadFilename);
                     element.style.display = 'none';
+
                     document.body.appendChild(element);
                     
                     element.click();

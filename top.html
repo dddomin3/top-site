@@ -1,4 +1,8 @@
 <head>
+  <meta http-equiv="cache-control" content="max-age=28000" />
+  <meta http-equiv="expires" content="0" />
+  <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+  <meta http-equiv="pragma" content="no-cache" />
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -11,13 +15,14 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
     crossorigin="anonymous"></script>
-  <script src="https://testofplayfulness.s3.us-east-2.amazonaws.com/top.js"></script>
+  <script src="https://www.testofplayfulness.com/top.js?hash=XAK8lWIb5I29PjeY"></script>
+  <link rel="icon" type="image/png" href="https://www.testofplayfulness.com/top.png">
 </head>
 
 <body>
   <div id="app" class="container">
     <div class="jumbotron">
-      <h1 class="display-4">Test of Playfulness Calculator</h1>
+      <h1 class="display-4"><img src="greyTop.png" alt="Test of Playfulness logo" style="width:auto;">Test of Playfulness Calculator<img src="greyTop.png" alt="Test of Playfulness logo" style="width:auto;transform: scaleX(-1);"></h1>
       <p class="lead">This generates an estimate of the test of playfulness using constants generated from previous
         iterations.</p>
       <hr class="my-4">
@@ -25,7 +30,7 @@
       <div class="row">
         <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-Name">Name/ID</span>
+            <span class="input-group-text" id="inputGroup-sizing-Name">Child's Name/ID</span>
           </div>
           <input v-model="name" @input="routeUpdate" class="form-control" aria-label="Name input" aria-describedby="inputGroup-sizing-Name">
         </div>
@@ -53,7 +58,7 @@
         </div>
         <div class="input-group input-group-sm col-sm mb-3">
           <div class="input-group-prepend">
-            <span class="input-group-text" id="inputGroup-sizing-ExaminerId">Examiner's ID</span>
+            <span class="input-group-text" id="inputGroup-sizing-ExaminerId">Examiner's ID<br /> Leave blank if unknown</span>
           </div>
           <input v-model="examinerId" @input="routeUpdate" class="form-control" aria-label="ExaminerId input"
             aria-describedby="inputGroup-sizing-ExaminerId">
@@ -84,6 +89,7 @@
         </div>
       </div>
       <div class="row">
+
         <div class="input-group input-group-sm col-sm mb-12">
           <div class="input-group-prepend">
             <span class="input-group-text" id="">Upload CSV...</span>
@@ -92,6 +98,9 @@
             <input type="file" @change="csvUploaded" class="custom-file-input" id="csvUpload">
             <label class="custom-file-label" for="csvUpload">Choose file</label>
           </div>
+        </div>
+        <div class="alert alert-info" role="alert" v-if="csvDownloadActive">
+          If your csv doesn't download immediately, <a :href="csvDownloadContent" :download="csvDownloadFilename"> click to download: {{csvDownloadFilename}}</a>
         </div>
       </div>
     </div>
@@ -104,8 +113,8 @@
       <table class="table">
         <tr>
           <th scope="col">Item Count</th>
-          <th scope="col">Expected score</th>
-          <th scope="col">Model variance</th>
+          <th scope="col">Expected Measure</th>
+          <th scope="col">Model Variance</th>
           <th scope="col">Raw Score</th>
           <th scope="col">Item Modifier</th>
           <th scope="col">ID Found?</th>
@@ -168,8 +177,8 @@
       <table class="table">
         <tr>
           <th scope="col">Item Count</th>
-          <th scope="col">Expected score</th>
-          <th scope="col">Model variance</th>
+          <th scope="col">Expected Measure</th>
+          <th scope="col">Model Variance</th>
           <th scope="col">Raw Score</th>
           <th scope="col">Item Modifier</th>
           <th scope="col">ID Found?</th>
@@ -186,36 +195,6 @@
     </div>
     <div class="alert alert-danger" role="alert" v-if="outputError">
       <strong>Error: </strong> {{errorText}}
-    </div>
-    <button type="button" class="btn disabled btn-danger btn-lg col-sm-3" v-on:click="debugModeActivate" role="button">
-      Don't click this.
-    </button>
-    <div v-if="debugMode" class="row">
-      
-      <div class="input-group input-group-sm col-sm mb-3" v-for="(data,i) in debugStepDifficulty">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-stepDifficulty">stepDifficulty[{{i}}]</span>
-        </div>
-        <input type="number" v-model.number="data.difficulty" class="form-control" aria-label="stepDifficulty input"
-          aria-describedby="inputGroup-sizing-stepDifficulty">
-      </div>
-
-      <div class="input-group input-group-sm col-sm mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-initialAbilityEstimate">initialAbilityEstimate</span>
-        </div>
-        <input type="number" v-model.number="config.initialAbilityEstimate" class="form-control" aria-label="initialAbilityEstimate input"
-          aria-describedby="inputGroup-sizing-initialAbilityEstimate">
-      </div>
-
-      <div class="input-group input-group-sm col-sm mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-defaultExaminerModifier">defaultExaminerModifier</span>
-        </div>
-        <input type="number" v-model.number="examinerData.default.measure" class="form-control"
-          aria-label="defaultExaminerModifier input" aria-describedby="inputGroup-sizing-defaultExaminerModifier">
-      </div>
-
     </div>
   </div>
 </body>
