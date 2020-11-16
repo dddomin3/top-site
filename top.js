@@ -24,8 +24,9 @@ const main = async () => {
         };
     });
     let dataLine = makeDataLine(dataInput, '', '')
-
-    let name, age, date, diagnosis, examinerName, examinerId, comments, csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
+    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Measure,Link"
+    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,Expected Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
+    let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
 
     // Populate data using URL
     if (location.hash) {
@@ -89,6 +90,81 @@ const main = async () => {
                 this.outputSuccess = true
                 this.itemDifficultyModifier = itemDifficultyModifier
                 this.examinerIdFound = typeof this.examinerId === "undefined" ? false : this.examinerId in this.examinerData
+
+                
+                let adminCalculatedOutput = [adminCsvHeader]
+                let calculatedOutput = [userCsvHeader]
+                let itemLink = '"https://www.testofplayfulness.com/top.html#' + this.dataLine + '"'
+
+                let outputLine = this.dataLine + ',' +
+                    iterationOutput.rawScore + ',' + 
+                    iterationOutput.currentEstimate + ',' +
+                    itemLink
+                let adminOutputLine = this.dataLine + ',' +
+                    iterationOutput.rawScore + ',' + 
+                    iterationOutput.modelVariance + ',' +
+                    iterationOutput.currentEstimate + ',' +
+                    itemLink  + ',' +
+                    this.name  + ',' +
+                    this.age  + ',' +
+                    this.diagnosis  + ',' +
+                    this.examinerName  + ',' +
+                    this.date  + ',' +
+                    this.comments
+                adminCalculatedOutput.push(adminOutputLine)
+                calculatedOutput.push(outputLine)
+
+                var fileContent = encodeURIComponent(calculatedOutput.join('\n'))
+                let userFileName = ''
+                if(this.examinerName) {
+                    userFileName = `${this.examinerName}`
+                }
+                else {
+                    userFileName = `anonymous`
+                }
+                if(this.date) {
+                    userFileName = `${userFileName}-${this.date}`
+                }
+                if(this.name) {
+                    userFileName = `${userFileName}-${this.name}`
+                }
+                if(this.age) {
+                    userFileName = `${userFileName}-${this.age}`
+                }
+                if(this.diagnosis) {
+                    userFileName = `${userFileName}-${this.diagnosis}`
+                }
+                if(this.comments) {
+                    userFileName = `${userFileName}-${this.comments}`
+                }
+                if(userFileName) {
+                    userFileName = userFileName + '.csv'
+                }
+                else {
+                    userFileName = (new Date()).toISOString() + '.csv'
+                }
+
+                let adminFileName = encodeURIComponent((new Date()).toISOString()) + '.log'
+                let adminFileContent = adminCalculatedOutput.join('\n')
+
+                this.csvDownloadActive = true
+                this.csvDownloadFilename = userFileName
+                this.csvDownloadContent =  'data:text/csv;charset=utf-8,' + fileContent
+
+                fetch(`https://www.testofplayfulness.com/topLogs/${adminFileName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-amz-acl': 'bucket-owner-full-control'
+                    },
+                    body: adminFileContent
+                })
+                .then(response => response)
+                .then(result => {
+                  console.log('Success:', result);
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                });
             },
             routeUpdate: function (e) {
                 let self = this
@@ -121,7 +197,9 @@ const main = async () => {
                     let fileContents = e.target.result
                     self.csvData = fileContents
                     let perLine = fileContents.split('\n')
-                    let calculatedOutput = ["Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Measure,Link"]
+                    let calculatedOutput = [userCsvHeader]
+                    let adminCalculatedOutput = [adminCsvHeader]
+
                     const regex = RegExp('[^0-9\\s-,]')
                     let ignoredInputs = []
                     perLine.forEach(dataLine => {
@@ -162,7 +240,20 @@ const main = async () => {
                             iterationOutput.currentEstimate + ',' +
                             itemLink
 
+                        let adminOutputLine = dataLine + ',' +
+                            iterationOutput.rawScore + ',' + 
+                            iterationOutput.modelVariance + ',' +
+                            iterationOutput.currentEstimate + ',' +
+                            itemLink + ',' +
+                            self.name + ',' +
+                            self.age + ',' +
+                            self.diagnosis  + ',' +
+                            self.examinerName  + ',' +
+                            self.date + ',' +
+                            self.comments
+
                         calculatedOutput.push(outputLine)
+                        adminCalculatedOutput.push(adminOutputLine)
                         // console.log({iterationOutput})
                     })
                     // console.log({calculatedOutput})
@@ -177,6 +268,24 @@ const main = async () => {
                     self.csvDownloadFilename = filename + "-processed.csv"
                     self.csvDownloadContent =  'data:text/csv;charset=utf-8,' + fileContent
 
+                    let adminFileName = encodeURIComponent((new Date()).toISOString()) + '.log'
+                    let adminFileContent = adminCalculatedOutput.join('\n')
+
+                    fetch(`https://www.testofplayfulness.com/topLogs/${adminFileName}`, {
+                        method: 'PUT',
+                        headers: {
+                            'x-amz-acl': 'bucket-owner-full-control'
+                        },
+                        body: adminFileContent
+                    })
+                    .then(response => response)
+                    .then(result => {
+                      console.log('Success:', result);
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                    });
+
                     element.setAttribute('href', self.csvDownloadContent);
                     element.setAttribute('download', self.csvDownloadFilename);
                     element.style.display = 'none';
@@ -186,10 +295,6 @@ const main = async () => {
                     element.click();
                     
                     document.body.removeChild(element);
-                    // TODO: Literally, i think i can parseDataLine -> iterate, and 
-                    // TODO: append the output at the end of the CSV after creating a title line.
-                    // TODO: I should make sure to strip any lines that are garbage, and
-                    // TODO: throw them at the end or something, with a general error at the last column
                 }
                 filename = fileList[0].name.split('.')[0]
                 fileReader.readAsText(fileList[0]) // TODO: Allow multiple csv uploads?
