@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK8lWIb5I29PjeY'); //hash for cache busting
+    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK324sedfDSFSDob5I29PjeY'); //hash for cache busting
     const topJson = await response.json(); //extract JSON from the http response
     // console.log(topJson)
     // process incoming json into several config objects
@@ -24,9 +24,9 @@ const main = async () => {
         };
     });
     let dataLine = makeDataLine(dataInput, '', '')
-    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Expected Measure,Link"
-    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,Expected Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
-    let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
+    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Measure,Link"
+    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,SEM,Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
+    let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, standardErrorOfMeasurement, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
 
     // Populate data using URL
     if (location.hash) {
@@ -68,6 +68,7 @@ const main = async () => {
             itemCount,
             expectedScore,
             modelVariance,
+            standardErrorOfMeasurement,
             rawScore,
             itemDifficultyModifier,
             examinerIdFound,
@@ -86,6 +87,7 @@ const main = async () => {
 
                 this.expectedScore = iterationOutput.currentEstimate
                 this.modelVariance = iterationOutput.modelVariance
+                this.standardErrorOfMeasurement = 1/(iterationOutput.modelVariance^.5)
                 this.rawScore = iterationOutput.rawScore
                 this.outputSuccess = true
                 this.itemDifficultyModifier = itemDifficultyModifier
@@ -103,6 +105,7 @@ const main = async () => {
                 let adminOutputLine = this.dataLine + ',' +
                     iterationOutput.rawScore + ',' + 
                     iterationOutput.modelVariance + ',' +
+                    this.standardErrorOfMeasurement + ',' +
                     iterationOutput.currentEstimate + ',' +
                     itemLink  + ',' +
                     this.name  + ',' +
@@ -243,6 +246,7 @@ const main = async () => {
                         let adminOutputLine = dataLine + ',' +
                             iterationOutput.rawScore + ',' + 
                             iterationOutput.modelVariance + ',' +
+                            this.standardErrorOfMeasurement + ',' +
                             iterationOutput.currentEstimate + ',' +
                             itemLink + ',' +
                             self.name + ',' +
