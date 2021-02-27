@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK324sedfDSFSDob5I29PjeY'); //hash for cache busting
+    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK458gtyfDSFSDob5I29PjeY'); //hash for cache busting
     const topJson = await response.json(); //extract JSON from the http response
     // console.log(topJson)
     // process incoming json into several config objects
@@ -24,9 +24,9 @@ const main = async () => {
         };
     });
     let dataLine = makeDataLine(dataInput, '', '')
-    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Measure,Link"
-    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Mischief/teasing (E),Process (E),Social Play (E),Clowns/jokes (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,SEM,Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
-    let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, standardErrorOfMeasurement, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false,csvDownloadContent = "",csvDownloadFilename ="";
+    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Measure,Link"
+    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,SEM,Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
+    let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, standardErrorOfMeasurement, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false, csvDownloadContent = "", csvDownloadFilename = "";
 
     // Populate data using URL
     if (location.hash) {
@@ -87,60 +87,60 @@ const main = async () => {
 
                 this.expectedScore = iterationOutput.currentEstimate
                 this.modelVariance = iterationOutput.modelVariance
-                this.standardErrorOfMeasurement = 1/(iterationOutput.modelVariance^.5)
+                this.standardErrorOfMeasurement = 1 / (iterationOutput.modelVariance ^ .5)
                 this.rawScore = iterationOutput.rawScore
                 this.outputSuccess = true
                 this.itemDifficultyModifier = itemDifficultyModifier
                 this.examinerIdFound = typeof this.examinerId === "undefined" ? false : this.examinerId in this.examinerData
 
-                
+
                 let adminCalculatedOutput = [adminCsvHeader]
                 let calculatedOutput = [userCsvHeader]
                 let itemLink = '"https://www.testofplayfulness.com/top.html#' + this.dataLine + '"'
 
                 let outputLine = this.dataLine + ',' +
-                    iterationOutput.rawScore + ',' + 
+                    iterationOutput.rawScore + ',' +
                     iterationOutput.currentEstimate + ',' +
                     itemLink
                 let adminOutputLine = this.dataLine + ',' +
-                    iterationOutput.rawScore + ',' + 
+                    iterationOutput.rawScore + ',' +
                     iterationOutput.modelVariance + ',' +
                     this.standardErrorOfMeasurement + ',' +
                     iterationOutput.currentEstimate + ',' +
-                    itemLink  + ',' +
-                    this.name  + ',' +
-                    this.age  + ',' +
-                    this.diagnosis  + ',' +
-                    this.examinerName  + ',' +
-                    this.date  + ',' +
+                    itemLink + ',' +
+                    this.name + ',' +
+                    this.age + ',' +
+                    this.diagnosis + ',' +
+                    this.examinerName + ',' +
+                    this.date + ',' +
                     this.comments
                 adminCalculatedOutput.push(adminOutputLine)
                 calculatedOutput.push(outputLine)
 
                 var fileContent = encodeURIComponent(calculatedOutput.join('\n'))
                 let userFileName = ''
-                if(this.examinerName) {
+                if (this.examinerName) {
                     userFileName = `${this.examinerName}`
                 }
                 else {
                     userFileName = `anonymous`
                 }
-                if(this.date) {
+                if (this.date) {
                     userFileName = `${userFileName}-${this.date}`
                 }
-                if(this.name) {
+                if (this.name) {
                     userFileName = `${userFileName}-${this.name}`
                 }
-                if(this.age) {
+                if (this.age) {
                     userFileName = `${userFileName}-${this.age}`
                 }
-                if(this.diagnosis) {
+                if (this.diagnosis) {
                     userFileName = `${userFileName}-${this.diagnosis}`
                 }
-                if(this.comments) {
+                if (this.comments) {
                     userFileName = `${userFileName}-${this.comments}`
                 }
-                if(userFileName) {
+                if (userFileName) {
                     userFileName = userFileName + '.csv'
                 }
                 else {
@@ -152,7 +152,7 @@ const main = async () => {
 
                 this.csvDownloadActive = true
                 this.csvDownloadFilename = userFileName
-                this.csvDownloadContent =  'data:text/csv;charset=utf-8,' + fileContent
+                this.csvDownloadContent = 'data:text/csv;charset=utf-8,' + fileContent
 
                 fetch(`https://www.testofplayfulness.com/topLogs/${adminFileName}`, {
                     method: 'PUT',
@@ -161,13 +161,13 @@ const main = async () => {
                     },
                     body: adminFileContent
                 })
-                .then(response => response)
-                .then(result => {
-                  console.log('Success:', result);
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                });
+                    .then(response => response)
+                    .then(result => {
+                        console.log('Success:', result);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
             },
             routeUpdate: function (e) {
                 let self = this
@@ -178,7 +178,7 @@ const main = async () => {
                 })
             },
             parseDataLine: function (e) {
-                let {name, examinerId, dataInput} = parseDataLine(this.dataLine, this.dataInput)
+                let { name, examinerId, dataInput } = parseDataLine(this.dataLine, this.dataInput)
                 this.name = name
                 this.examinerId = examinerId
                 // this.dataInput = dataInput // This might break stuff...
@@ -210,7 +210,7 @@ const main = async () => {
                         // TODO: Can do some string treatment here to correct common mistakes or something...
                         let skip = regex.test(dataLine)
                         // console.log({dataLine, skip})
-                        if (skip) { ignoredInputs.push(dataLine); return;}
+                        if (skip) { ignoredInputs.push(dataLine); return; }
                         let csvDataInput = self.dataFormat.map(function (i) {
                             inputObject = {}
                             if (i.extent) {
@@ -239,20 +239,20 @@ const main = async () => {
                         let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config)
                         let itemLink = '"https://www.testofplayfulness.com/top.html#' + dataLine + '"'
                         let outputLine = dataLine + ',' +
-                            iterationOutput.rawScore + ',' + 
+                            iterationOutput.rawScore + ',' +
                             iterationOutput.currentEstimate + ',' +
                             itemLink
 
                         let adminOutputLine = dataLine + ',' +
-                            iterationOutput.rawScore + ',' + 
+                            iterationOutput.rawScore + ',' +
                             iterationOutput.modelVariance + ',' +
                             this.standardErrorOfMeasurement + ',' +
                             iterationOutput.currentEstimate + ',' +
                             itemLink + ',' +
                             self.name + ',' +
                             self.age + ',' +
-                            self.diagnosis  + ',' +
-                            self.examinerName  + ',' +
+                            self.diagnosis + ',' +
+                            self.examinerName + ',' +
                             self.date + ',' +
                             self.comments
 
@@ -270,7 +270,7 @@ const main = async () => {
                     )
                     self.csvDownloadActive = true
                     self.csvDownloadFilename = filename + "-processed.csv"
-                    self.csvDownloadContent =  'data:text/csv;charset=utf-8,' + fileContent
+                    self.csvDownloadContent = 'data:text/csv;charset=utf-8,' + fileContent
 
                     let adminFileName = encodeURIComponent((new Date()).toISOString()) + '.log'
                     let adminFileContent = adminCalculatedOutput.join('\n')
@@ -282,22 +282,22 @@ const main = async () => {
                         },
                         body: adminFileContent
                     })
-                    .then(response => response)
-                    .then(result => {
-                      console.log('Success:', result);
-                    })
-                    .catch(error => {
-                      console.error('Error:', error);
-                    });
+                        .then(response => response)
+                        .then(result => {
+                            console.log('Success:', result);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
 
                     element.setAttribute('href', self.csvDownloadContent);
                     element.setAttribute('download', self.csvDownloadFilename);
                     element.style.display = 'none';
 
                     document.body.appendChild(element);
-                    
+
                     element.click();
-                    
+
                     document.body.removeChild(element);
                 }
                 filename = fileList[0].name.split('.')[0]
@@ -338,7 +338,7 @@ function makeDataLine(dataInput, subjectId, raterId) {
             }
         }
     })
-    let dataLineArray = [subjectId, raterId, '1-28'].concat(extent, intensity, skill)
+    let dataLineArray = [subjectId, raterId, '1-26'].concat(extent, intensity, skill)
     return dataLineArray.join()
 }
 
@@ -380,7 +380,7 @@ function parseDataLine(dataLine, dataInput) {
             }
         }
     })
-    return {name, examinerId, dataInput}
+    return { name, examinerId, dataInput }
 }
 
 function countItems(dataInput) {
