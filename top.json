@@ -10,9 +10,6 @@
     "outdoorModifier": 0.22
   },
   "examinerData": {
-    "default": {
-      "measure": 0
-    },
     "1": {
       "measure": 0.12
     },
@@ -753,6 +750,9 @@
     },
     "579": {
       "measure": 0.2
+    },
+    "default": {
+      "measure": 0
     }
   },
   "items": [
@@ -821,11 +821,7 @@
     },
     {
       "displayName": "Engages in playful mischief or teasing.",
-      "extent": true,
-      "extentDetail": {
-        "name": "mischief/teasing ext",
-        "itemDifficulty": 3.45
-      },
+      "extent": false,
       "intensity": false,
       "skill": true,
       "skillDetail": {
@@ -835,7 +831,7 @@
       "comments": ""
     },
     {
-      "displayName": "Engages in activity for the sheer pleasure of it (process) rather than primarily for the end product.",
+      "displayName": "Engages in activity for the process of it rather than primarily for the end product.",
       "extent": true,
       "extentDetail": {
         "name": "process ext",
@@ -932,11 +928,7 @@
     },
     {
       "displayName": "Clowns or jokes.",
-      "extent": true,
-      "extentDetail": {
-        "name": "clowns/jokes ext",
-        "itemDifficulty": 3.35
-      },
+      "extent": false,
       "intensity": false,
       "skill": true,
       "skillDetail": {
