@@ -380,6 +380,8 @@ function parseDataLine(dataLine, dataInput) {
             }
         }
     })
+    // TODO: Hear me out. If there's left over data in the dataInput, then, shouldn't you flag this as bad data?
+    // I'd honestly check if there's only spaces or junk data, but this could be doable.
     return { name, examinerId, dataInput }
 }
 
