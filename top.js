@@ -382,7 +382,7 @@ function parseDataLine(dataLine, dataInput) {
     })
     const regex2 = RegExp('[\\s,]*') // checking to see if remaining data (if any) is just blank
     let good = regex2.test(dataLineArray.join())
-    if (!good) { console.log("Found a skip here", dataLine) dataLineArray.join() }
+    if (!good) { console.log("Found a skip here", dataLine, dataLineArray.join()) }
     return { name, examinerId, dataInput }
 }
 
