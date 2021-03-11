@@ -203,7 +203,7 @@ const main = async () => {
                     let calculatedOutput = [userCsvHeader]
                     let adminCalculatedOutput = [adminCsvHeader]
 
-                    const regex = RegExp('[^0-9\\s-,]')
+                    const regex = RegExp('[^a-zA-Z0-9\\s-,]*')
                     let ignoredInputs = []
                     perLine.forEach(dataLine => {
                         dataLine = dataLine.trim() // Removes any whitespace characters that crept their way in
@@ -380,8 +380,9 @@ function parseDataLine(dataLine, dataInput) {
             }
         }
     })
-    // TODO: Hear me out. If there's left over data in the dataInput, then, shouldn't you flag this as bad data?
-    // I'd honestly check if there's only spaces or junk data, but this could be doable.
+    const regex2 = RegExp('[\\s,]*') // checking to see if remaining data (if any) is just blank
+    let good = regex2.test(dataLineArray.join())
+    if (!good) { console.log("Found a skip here", dataLine) dataLineArray.join() }
     return { name, examinerId, dataInput }
 }
 
