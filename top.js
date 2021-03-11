@@ -238,12 +238,12 @@ const main = async () => {
                         let itemDifficultyModifier = calculateItemDifficultyModifier(examinerId, self.config, self.examinerData)
                         let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config)
                         let itemLink = '"https://www.testofplayfulness.com/top.html#' + dataLine + '"'
-                        let outputLine = dataLine + ',' +
+                        let outputLine = makeDataLine(dataInput, name, examinerId) + ',' +
                             iterationOutput.rawScore + ',' +
                             iterationOutput.currentEstimate + ',' +
                             itemLink
 
-                        let adminOutputLine = dataLine + ',' +
+                        let adminOutputLine = makeDataLine(dataInput, name, examinerId) + ',' +
                             iterationOutput.rawScore + ',' +
                             iterationOutput.modelVariance + ',' +
                             this.standardErrorOfMeasurement + ',' +
