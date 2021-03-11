@@ -203,7 +203,7 @@ const main = async () => {
                     let calculatedOutput = [userCsvHeader]
                     let adminCalculatedOutput = [adminCsvHeader]
 
-                    const regex = RegExp('[^a-zA-Z0-9\\s-,]*')
+                    const regex = RegExp('[^a-zA-Z0-9\\s-,]')
                     let ignoredInputs = []
                     perLine.forEach(dataLine => {
                         dataLine = dataLine.trim() // Removes any whitespace characters that crept their way in
