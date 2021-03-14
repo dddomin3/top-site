@@ -24,8 +24,8 @@ const main = async () => {
         };
     });
     let dataLine = makeDataLine(dataInput, '', '')
-    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Measure,Link"
-    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,SEM,Measure,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
+    let userCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Measure,Outfit Mean Square,Infit Mean Square,Link"
+    let adminCsvHeader = "Child,Rater,,Engaged (E),Decides (E),Safety (E),Process (E),Social Play (E),Engaged (I),Persist (I),Social Play (I),Affect (I),Interact'n with objects (I),Engaged (S),Modifies (S),Mischief/teasing (S),Pretends (S),Unconvent'l/variable (S),Negotiates (S),Social Play (S),Supports (S),Enters (S),Initiates (S),Clowns/jokes (S),Shares (S),Gives (S),Responds (S),Intract'n with objects (S),Transitions (S),Raw Score,Model Variance,SEM,Measure,Outfit Mean Square,Infit Mean Square,Link,Examinee Name,Examinee Age,Examinee Diagnosis,Examiner Name,Examination Date,Examination Comments"
     let name = "", age = "", date = "", diagnosis = "", examinerName = "", examinerId = "", comments = "", csvData, itemCount, expectedScore, modelVariance, standardErrorOfMeasurement, rawScore, outputSuccess, outputError, errorText, itemDifficultyModifier, examinerIdFound = false, debugStepDifficulty, csvDownloadActive = false, csvDownloadContent = "", csvDownloadFilename = "";
 
     // Populate data using URL
@@ -70,6 +70,8 @@ const main = async () => {
             modelVariance,
             standardErrorOfMeasurement,
             rawScore,
+            outfitMeanSquare,
+            infitMeanSquare,
             itemDifficultyModifier,
             examinerIdFound,
             errorText,
@@ -83,12 +85,14 @@ const main = async () => {
                 // console.log("Item Count is: " + this.itemCount)
                 let itemDifficultyModifier = calculateItemDifficultyModifier(this.examinerId, this.config, this.examinerData)
                 // console.log(itemDifficultyModifier)
-                iterationOutput = iterate(this.dataInput, this.dataFormat, itemDifficultyModifier, this.config)
+                iterationOutput = iterate(this.dataInput, this.dataFormat, itemDifficultyModifier, this.config, this.itemCount)
 
                 this.expectedScore = iterationOutput.currentEstimate
                 this.modelVariance = iterationOutput.modelVariance
                 this.standardErrorOfMeasurement = 1 / (iterationOutput.modelVariance ^ .5)
                 this.rawScore = iterationOutput.rawScore
+                this.infitMeanSquare = iterationOutput.infitMeanSquare
+                this.outfitMeanSquare = iterationOutput.outfitMeanSquare
                 this.outputSuccess = true
                 this.itemDifficultyModifier = itemDifficultyModifier
                 this.examinerIdFound = typeof this.examinerId === "undefined" ? false : this.examinerId in this.examinerData
@@ -236,11 +240,14 @@ const main = async () => {
                         csvDataInput = parsedOutput.dataInput
                         // console.log({name, examinerId, csvDataInput})
                         let itemDifficultyModifier = calculateItemDifficultyModifier(examinerId, self.config, self.examinerData)
-                        let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config)
+                        let itemCount = countItems(csvDataInput)
+                        let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config, itemCount)
                         let itemLink = '"https://www.testofplayfulness.com/top.html#' + dataLine + '"'
                         let outputLine = makeDataLine(dataInput, name, examinerId) + ',' +
                             iterationOutput.rawScore + ',' +
                             iterationOutput.currentEstimate + ',' +
+                            iterationOutput.outfitMeanSquare + ',' +
+                            iterationOutput.infitMeanSquare + ',' +
                             itemLink
 
                         let adminOutputLine = makeDataLine(dataInput, name, examinerId) + ',' +
@@ -248,6 +255,8 @@ const main = async () => {
                             iterationOutput.modelVariance + ',' +
                             this.standardErrorOfMeasurement + ',' +
                             iterationOutput.currentEstimate + ',' +
+                            iterationOutput.outfitMeanSquare + ',' +
+                            iterationOutput.infitMeanSquare + ',' +
                             itemLink + ',' +
                             self.name + ',' +
                             self.age + ',' +
@@ -394,13 +403,19 @@ function countItems(dataInput) {
     }).reduce((prev, curr) => prev + curr, 0)
 }
 
-function perItemMath(itemDifficulty, abilityEstimate, itemName, config) {
+function perItemMath(itemDifficulty, abilityEstimate, inputData, config) {
     let logit = abilityEstimate - itemDifficulty
 
     let normalizer = 0
     let expectation = 0
     let sumSquare = 0
     let currentLogit = 0
+    let residual = 0
+    let standardizedResidual = 0
+    let remark = ""
+    let itemOutfitMeanSquareNumerator = 0
+    let itemInfitMeanSquareNumerator = 0
+    let itemInfitMeanSquareDivisor = 0
 
     config.stepDifficulty.forEach(function (currentStepDifficulty, i) {
         currentLogit = currentLogit + logit - currentStepDifficulty
@@ -409,10 +424,22 @@ function perItemMath(itemDifficulty, abilityEstimate, itemName, config) {
         expectation = expectation + i * value
         sumSquare = sumSquare + i * i * value
     })
-    // console.log({ itemName, normalizer, expectation, sumSquare, currentLogit })
     expectation = expectation / normalizer
     variance = sumSquare / normalizer - expectation * expectation
-    return { expectation, variance }
+    residual = inputData - expectation
+    standardizedResidual = residual / (variance ^ (.5))
+    if (standardizedResidual > 2) {
+        remark = "Unexpectedly high rating"
+    }
+    else if (standardizedResidual < 2) {
+        remark = "Unexpectedly low rating"
+    }
+
+    itemOutfitMeanSquareNumerator = standardizedResidual * standardizedResidual
+    itemInfitMeanSquareNumerator = residual * residual
+    itemInfitMeanSquareDivisor = variance
+
+    return { expectation, variance, itemOutfitMeanSquareNumerator, itemInfitMeanSquareNumerator, itemInfitMeanSquareDivisor, remark }
 }
 function calculateItemDifficultyModifier(examinerId, config, examinerData) {
     let modifier = 0
@@ -424,7 +451,7 @@ function calculateItemDifficultyModifier(examinerId, config, examinerData) {
     }
     return modifier
 }
-function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
+function iterate(dataInput, dataFormat, itemDifficultyModifier, config, itemCount) {
     let previousEstimate = 0 // initial estimate
     let previousPreviousEstimate = 0 // for overshooting
 
@@ -432,11 +459,15 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
     let expectedScore = outputMath.expectedScore
     let modelVariance = outputMath.modelVariance
     let rawScore = outputMath.rawScore
+    let outfitMeanSquareNumerator = outputMath.outfitMeanSquareNumerator
+    let infitMeanSquareNumerator = outputMath.infitMeanSquareNumerator
+    let infitMeanSquareDivisor = outputMath.infitMeanSquareDivisor
     let currentEstimate = previousEstimate + (rawScore - expectedScore) / modelVariance
 
     let maxIterations = 1000
     let iterationCount = 0
-    while (currentEstimate - previousEstimate >= .01) {
+
+    while (currentEstimate - previousEstimate >= .01) { // Loop back to step 5) until the change in ability is too small (.01) to matter
         overshot = theEstimatesOvershoot(previousPreviousEstimate, previousEstimate, currentEstimate)
         previousPreviousEstimate = previousEstimate
         previousEstimate = currentEstimate
@@ -456,12 +487,20 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config) {
         outputMath = iterativeMath(dataInput, dataFormat, previousEstimate, itemDifficultyModifier, config)
         expectedScore = outputMath.expectedScore
         rawScore = outputMath.rawScore
+
+        outfitMeanSquareNumerator = outputMath.outfitMeanSquareNumerator
+        infitMeanSquareNumerator = outputMath.infitMeanSquareNumerator
+        infitMeanSquareDivisor = outputMath.infitMeanSquareDivisor
+
         currentEstimate = previousEstimate + (rawScore - expectedScore) / modelVariance
+
         iterationCount++
         if (iterationCount > maxIterations) { break }
     }
+    let outfitMeanSquare = outfitMeanSquareNumerator / itemCount
+    let infitMeanSquare = infitMeanSquareNumerator / infitMeanSquareDivisor
     // console.log({ iterationCount })
-    return { currentEstimate, modelVariance, rawScore }
+    return { currentEstimate, modelVariance, rawScore, outfitMeanSquare, infitMeanSquare }
 }
 
 function iterativeMath(dataInput, dataFormat, abilityEstimate, itemDifficultyModifier, config) {
@@ -469,33 +508,45 @@ function iterativeMath(dataInput, dataFormat, abilityEstimate, itemDifficultyMod
     let rawScore = 0
     let expectedScore = 0
     let modelVariance = 0
+    let outfitMeanSquareNumerator = 0
+    let infitMeanSquareNumerator = 0
+    let infitMeanSquareDivisor = 0
 
     dataInput.map(function (input, i) {
         dataFormatEntry = dataFormat[i]
         if (input.data.extent && input.data.extent !== "ns") {
             rawScore = rawScore + Number(input.data.extent)
             itemDifficulty = dataFormatEntry.extentDetail.itemDifficulty + itemDifficultyModifier
-            perItemResults = perItemMath(itemDifficulty, abilityEstimate, input.displayName + " extent", config)
+            perItemResults = perItemMath(itemDifficulty, abilityEstimate, Number(input.data.extent), config)
             expectedScore = expectedScore + perItemResults.expectation
             modelVariance = modelVariance + perItemResults.variance
+            outfitMeanSquareNumerator = outfitMeanSquareNumerator + perItemResults.itemOutfitMeanSquareNumerator
+            infitMeanSquareNumerator = infitMeanSquareNumerator + perItemResults.itemInfitMeanSquareNumerator
+            infitMeanSquareDivisor = infitMeanSquareDivisor + perItemResults.itemInfitMeanSquareDivisor
         }
         if (input.data.intensity && input.data.intensity !== "ns") {
             rawScore = rawScore + Number(input.data.intensity)
             itemDifficulty = dataFormatEntry.intensityDetail.itemDifficulty + itemDifficultyModifier
-            perItemResults = perItemMath(itemDifficulty, abilityEstimate, input.displayName + " intensity", config)
+            perItemResults = perItemMath(itemDifficulty, abilityEstimate, Number(input.data.intensity), config)
             expectedScore = expectedScore + perItemResults.expectation
             modelVariance = modelVariance + perItemResults.variance
+            outfitMeanSquareNumerator = outfitMeanSquareNumerator + perItemResults.itemOutfitMeanSquareNumerator
+            infitMeanSquareNumerator = infitMeanSquareNumerator + perItemResults.itemInfitMeanSquareNumerator
+            infitMeanSquareDivisor = infitMeanSquareDivisor + perItemResults.itemInfitMeanSquareDivisor
         }
         if (input.data.skill && input.data.skill !== "ns") {
             rawScore = rawScore + Number(input.data.skill)
             itemDifficulty = dataFormatEntry.skillDetail.itemDifficulty + itemDifficultyModifier
-            perItemResults = perItemMath(itemDifficulty, abilityEstimate, input.displayName + " skill", config)
+            perItemResults = perItemMath(itemDifficulty, abilityEstimate, Number(input.data.skill), config)
             expectedScore = expectedScore + perItemResults.expectation
             modelVariance = modelVariance + perItemResults.variance
+            outfitMeanSquareNumerator = outfitMeanSquareNumerator + perItemResults.itemOutfitMeanSquareNumerator
+            infitMeanSquareNumerator = infitMeanSquareNumerator + perItemResults.itemInfitMeanSquareNumerator
+            infitMeanSquareDivisor = infitMeanSquareDivisor + perItemResults.itemInfitMeanSquareDivisor
         }
     })
     // console.log({ expectedScore, modelVariance, rawScore })
-    return { expectedScore, modelVariance, rawScore }
+    return { expectedScore, modelVariance, rawScore, outfitMeanSquareNumerator, infitMeanSquareNumerator, infitMeanSquareDivisor }
 }
 
 function theEstimatesOvershoot(prevprev, prev, curr) {
