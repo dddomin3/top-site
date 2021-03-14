@@ -1,5 +1,5 @@
 const main = async () => {
-    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=XAK458gtyfDSFSDob5I29PjeY'); //hash for cache busting
+    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=ly2SaEUI7URHn4fHnG7CU4ukl'); //hash for cache busting
     const topJson = await response.json(); //extract JSON from the http response
     // console.log(topJson)
     // process incoming json into several config objects

@@ -761,17 +761,17 @@
       "extent": true,
       "extentDetail": {
         "name": "engaged ext",
-        "itemDifficulty": -1.91
+        "itemDifficulty": -1.7
       },
       "intensity": true,
       "intensityDetail": {
         "name": "engaged int",
-        "itemDifficulty": -0.48
+        "itemDifficulty": -0.4
       },
       "skill": true,
       "skillDetail": {
         "name": "engaged skill",
-        "itemDifficulty": -0.25
+        "itemDifficulty": 0.13
       },
       "comments": ""
     },
@@ -780,7 +780,7 @@
       "extent": true,
       "extentDetail": {
         "name": "decides ext",
-        "itemDifficulty": -2.15
+        "itemDifficulty": -1.84
       },
       "intensity": false,
       "skill": false,
@@ -791,7 +791,7 @@
       "extent": true,
       "extentDetail": {
         "name": "safe ext",
-        "itemDifficulty": -3.03
+        "itemDifficulty": -2.79
       },
       "intensity": false,
       "skill": false,
@@ -803,7 +803,7 @@
       "intensity": true,
       "intensityDetail": {
         "name": "persists int",
-        "itemDifficulty": 0.08
+        "itemDifficulty": 0.11
       },
       "skill": false,
       "comments": ""
@@ -815,7 +815,7 @@
       "skill": true,
       "skillDetail": {
         "name": "modifies skill",
-        "itemDifficulty": 0.45
+        "itemDifficulty": 1.03
       },
       "comments": ""
     },
@@ -826,7 +826,7 @@
       "skill": true,
       "skillDetail": {
         "name": "mischief/teasing skill",
-        "itemDifficulty": 1.02
+        "itemDifficulty": 1.53
       },
       "comments": ""
     },
@@ -835,7 +835,7 @@
       "extent": true,
       "extentDetail": {
         "name": "process ext",
-        "itemDifficulty": -1.84
+        "itemDifficulty": -1.73
       },
       "intensity": false,
       "skill": false,
@@ -848,7 +848,7 @@
       "skill": true,
       "skillDetail": {
         "name": "pretends skill",
-        "itemDifficulty": 0.74
+        "itemDifficulty": 1.2
       },
       "comments": ""
     },
@@ -859,7 +859,7 @@
       "skill": true,
       "skillDetail": {
         "name": "unconventional skill",
-        "itemDifficulty": 1.15
+        "itemDifficulty": 1.68
       },
       "comments": ""
     },
@@ -870,7 +870,7 @@
       "skill": true,
       "skillDetail": {
         "name": "negotiates skill",
-        "itemDifficulty": 0.07
+        "itemDifficulty": 0.38
       },
       "comments": ""
     },
@@ -879,17 +879,17 @@
       "extent": true,
       "extentDetail": {
         "name": "social play ext",
-        "itemDifficulty": -0.69
+        "itemDifficulty": -0.75
       },
       "intensity": true,
       "intensityDetail": {
         "name": "social int",
-        "itemDifficulty": -0.17
+        "itemDifficulty": -0.09
       },
       "skill": true,
       "skillDetail": {
         "name": "social play skill",
-        "itemDifficulty": 0.31
+        "itemDifficulty": 0.51
       },
       "comments": ""
     },
@@ -900,7 +900,7 @@
       "skill": true,
       "skillDetail": {
         "name": "supports skill",
-        "itemDifficulty": 0.79
+        "itemDifficulty": 1.19
       },
       "comments": ""
     },
@@ -911,7 +911,7 @@
       "skill": true,
       "skillDetail": {
         "name": "enters skill",
-        "itemDifficulty": 0.22
+        "itemDifficulty": 0.55
       },
       "comments": ""
     },
@@ -922,7 +922,7 @@
       "skill": true,
       "skillDetail": {
         "name": "initiates skill",
-        "itemDifficulty": 0.37
+        "itemDifficulty": 0.71
       },
       "comments": ""
     },
@@ -933,7 +933,7 @@
       "skill": true,
       "skillDetail": {
         "name": "clowns/jokes skill",
-        "itemDifficulty": 1.36
+        "itemDifficulty": 1.87
       },
       "comments": ""
     },
@@ -944,7 +944,7 @@
       "skill": true,
       "skillDetail": {
         "name": "shares skill",
-        "itemDifficulty": -0.13
+        "itemDifficulty": 0.17
       },
       "comments": ""
     },
@@ -955,7 +955,7 @@
       "skill": true,
       "skillDetail": {
         "name": "gives cues skill",
-        "itemDifficulty": -0.65
+        "itemDifficulty": -0.52
       },
       "comments": ""
     },
@@ -966,7 +966,7 @@
       "skill": true,
       "skillDetail": {
         "name": "reads cues skill",
-        "itemDifficulty": -0.29
+        "itemDifficulty": -0.17
       },
       "comments": ""
     },
@@ -976,7 +976,7 @@
       "intensity": true,
       "intensityDetail": {
         "name": "affect int",
-        "itemDifficulty": 0.22
+        "itemDifficulty": 0.34
       },
       "skill": false,
       "comments": ""
@@ -987,12 +987,12 @@
       "intensity": true,
       "intensityDetail": {
         "name": "interact with object int",
-        "itemDifficulty": -0.72
+        "itemDifficulty": -0.61
       },
       "skill": true,
       "skillDetail": {
         "name": "interacts with obj skill",
-        "itemDifficulty": -0.64
+        "itemDifficulty": -0.41
       },
       "comments": ""
     },
@@ -1003,7 +1003,7 @@
       "skill": true,
       "skillDetail": {
         "name": "transitions skill",
-        "itemDifficulty": -0.64
+        "itemDifficulty": -0.39
       },
       "comments": ""
     }
