@@ -89,7 +89,7 @@ const main = async () => {
 
                 this.expectedScore = iterationOutput.currentEstimate
                 this.modelVariance = iterationOutput.modelVariance
-                this.standardErrorOfMeasurement = 1 / (iterationOutput.modelVariance ^ .5)
+                this.standardErrorOfMeasurement = 1 / Math.sqrt(iterationOutput.modelVariance)
                 this.rawScore = iterationOutput.rawScore
                 this.infitMeanSquare = iterationOutput.infitMeanSquare
                 this.outfitMeanSquare = iterationOutput.outfitMeanSquare
@@ -426,9 +426,9 @@ function perItemMath(itemDifficulty, abilityEstimate, inputData, config) {
         sumSquare = sumSquare + i * i * value
     })
     expectation = expectation / normalizer
-    variance = sumSquare / normalizer - (expectation * expectation)
+    variance = (sumSquare / normalizer) - (expectation * expectation)
     residual = inputData - expectation
-    standardizedResidual = residual / (variance ^ (.5))
+    standardizedResidual = residual / Math.sqrt(variance)
     if (standardizedResidual > 2) {
         remark = "Unexpectedly high rating"
     }
