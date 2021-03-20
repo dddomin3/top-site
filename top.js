@@ -411,6 +411,7 @@ function perItemMath(itemDifficulty, abilityEstimate, inputData, config) {
     let sumSquare = 0
     let currentLogit = 0
     let residual = 0
+    let variance = 0
     let standardizedResidual = 0
     let remark = ""
     let itemOutfitMeanSquareNumerator = 0
@@ -425,7 +426,7 @@ function perItemMath(itemDifficulty, abilityEstimate, inputData, config) {
         sumSquare = sumSquare + i * i * value
     })
     expectation = expectation / normalizer
-    variance = sumSquare / normalizer - expectation * expectation
+    variance = sumSquare / normalizer - (expectation * expectation)
     residual = inputData - expectation
     standardizedResidual = residual / (variance ^ (.5))
     if (standardizedResidual > 2) {
@@ -467,7 +468,7 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config, itemCoun
     let maxIterations = 1000
     let iterationCount = 0
 
-    while (currentEstimate - previousEstimate >= .01) { // Loop back to step 5) until the change in ability is too small (.01) to matter
+    while (Math.abs(currentEstimate - previousEstimate) >= .01) { // Loop back to step 5) until the change in ability is too small (.01) to matter
         overshot = theEstimatesOvershoot(previousPreviousEstimate, previousEstimate, currentEstimate)
         previousPreviousEstimate = previousEstimate
         previousEstimate = currentEstimate
@@ -477,7 +478,6 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config, itemCoun
             if (modelVariance < 1) {
                 // ...and set its minimum value at 1.0:  Variance divider = max(Variance*2, 1.0)
                 modelVariance = 1
-                outputMath.modelVariance = 1
             }
             // console.log('overshot')
         }
@@ -499,6 +499,7 @@ function iterate(dataInput, dataFormat, itemDifficultyModifier, config, itemCoun
     }
     let outfitMeanSquare = outfitMeanSquareNumerator / itemCount
     let infitMeanSquare = infitMeanSquareNumerator / infitMeanSquareDivisor
+    outfitMeanSquare = outfitMeanSquare > 9.9 ? 9.9 : outfitMeanSquare
     // console.log({ iterationCount })
     return { currentEstimate, modelVariance, rawScore, outfitMeanSquare, infitMeanSquare }
 }
@@ -545,6 +546,7 @@ function iterativeMath(dataInput, dataFormat, abilityEstimate, itemDifficultyMod
             infitMeanSquareDivisor = infitMeanSquareDivisor + perItemResults.itemInfitMeanSquareDivisor
         }
     })
+    modelVariance = modelVariance < 0.00001 ? 0.00001 : modelVariance
     // console.log({ expectedScore, modelVariance, rawScore })
     return { expectedScore, modelVariance, rawScore, outfitMeanSquareNumerator, infitMeanSquareNumerator, infitMeanSquareDivisor }
 }
