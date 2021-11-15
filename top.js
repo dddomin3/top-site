@@ -1,5 +1,7 @@
 const main = async () => {
-    const response = await fetch('https://www.testofplayfulness.com/top.json?hash=ly2SaEUI7URHn4fHnG7CU4ukl'); //hash for cache busting
+    const currentLocation = window.location
+    const baseUrlProtocol = currentLocation.protocol + '//' + currentLocation.hostname
+    const response = await fetch(baseUrlProtocol + '/top.json?hash=ly2ai8tgLiRHn4fHnG7RY4ukl'); //hash for cache busting
     const topJson = await response.json(); //extract JSON from the http response
     // console.log(topJson)
     // process incoming json into several config objects
@@ -100,7 +102,7 @@ const main = async () => {
 
                 let adminCalculatedOutput = [adminCsvHeader]
                 let calculatedOutput = [userCsvHeader]
-                let itemLink = '"https://www.testofplayfulness.com/top.html#' + this.dataLine + '"'
+                let itemLink = '"' + baseUrlProtocol + '/top.html#' + this.dataLine + '"'
 
                 let outputLine = this.dataLine + ',' +
                     iterationOutput.rawScore + ',' +
@@ -158,7 +160,7 @@ const main = async () => {
                 this.csvDownloadFilename = userFileName
                 this.csvDownloadContent = 'data:text/csv;charset=utf-8,' + fileContent
 
-                fetch(`https://www.testofplayfulness.com/topLogs/${adminFileName}`, {
+                fetch(`${baseUrlProtocol}/topLogs/${adminFileName}`, {
                     method: 'PUT',
                     headers: {
                         'x-amz-acl': 'bucket-owner-full-control'
@@ -242,7 +244,7 @@ const main = async () => {
                         let itemDifficultyModifier = calculateItemDifficultyModifier(examinerId, self.config, self.examinerData)
                         let itemCount = countItems(csvDataInput)
                         let iterationOutput = iterate(csvDataInput, self.dataFormat, itemDifficultyModifier, self.config, itemCount)
-                        let itemLink = '"https://www.testofplayfulness.com/top.html#' + dataLine + '"'
+                        let itemLink = '"' + baseUrlProtocol + '/top.html#' + dataLine + '"'
                         let outputLine = makeDataLine(dataInput, name, examinerId) + ',' +
                             iterationOutput.rawScore + ',' +
                             iterationOutput.currentEstimate + ',' +
@@ -284,7 +286,7 @@ const main = async () => {
                     let adminFileName = encodeURIComponent((new Date()).toISOString()) + '.log'
                     let adminFileContent = adminCalculatedOutput.join('\n')
 
-                    fetch(`https://www.testofplayfulness.com/topLogs/${adminFileName}`, {
+                    fetch(`${baseUrlProtocol}/topLogs/${adminFileName}`, {
                         method: 'PUT',
                         headers: {
                             'x-amz-acl': 'bucket-owner-full-control'
